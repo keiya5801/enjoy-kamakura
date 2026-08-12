@@ -21,7 +21,7 @@ const TRIP_DAYS = [
       { time: '12:30', dateIndex: 0, emoji: '🕊', text: '鶴岡八幡宮お参り', showTime: false, spotId: 'tsurugaoka' },
       { time: '13:30', dateIndex: 0, emoji: '👣', text: 'ぷらぷら散策', showTime: false },
       { time: '15:00', dateIndex: 0, emoji: '✅', text: 'ホテルチェックイン', showTime: true },
-      { time: '15:30', dateIndex: 0, emoji: '🏊', text: 'プール', showTime: true },
+      { time: '15:30', dateIndex: 0, emoji: '🏊', text: 'プール', showTime: true, rainAlt: 'ホテルの大浴場・温泉でぽかぽかタイム ♨️ プールの代わりにゆったり二人でリラックス。' },
       { time: '17:00', dateIndex: 0, emoji: '🚿', text: '部屋でシャワー', showTime: true },
       { time: '18:00', dateIndex: 0, emoji: '🌉', text: 'ホテルのレストランでディナー', showTime: true },
       { time: '20:00', dateIndex: 0, emoji: '🚶', text: 'お散歩', showTime: true },
@@ -41,7 +41,7 @@ const TRIP_DAYS = [
       { time: '13:00', dateIndex: 1, emoji: '🍽️', text: '七里ヶ浜あたりでランチ', showTime: true },
       { time: '15:00', dateIndex: 1, emoji: '🏝️', text: '江の島到着', showTime: true },
       { time: '16:00', dateIndex: 1, emoji: '⛩️', text: '階段を登った先の神社にお参り', showTime: true, spotId: 'enoshima-jinja' },
-      { time: '17:00', dateIndex: 1, emoji: '🌅', text: '夕日を見る', showTime: true },
+      { time: '17:00', dateIndex: 1, emoji: '🌅', text: '夕日を見る', showTime: true, rainAlt: '新江ノ島水族館でまったり過ごすのも◎ 完全屋内だから雨でも1日中楽しめる江の島の切り札。' },
       { time: '17:50', dateIndex: 1, emoji: '😋', text: '夜ごはん', showTime: false },
       { time: '19:30', dateIndex: 1, emoji: '🌃', text: 'シーキャンドル（塔）に登る', showTime: true, spotId: 'sea-candle' },
       { time: '20:30', dateIndex: 1, emoji: '👣', text: 'ぷらぷら', showTime: false }

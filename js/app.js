@@ -224,6 +224,7 @@ function renderScheduleList() {
       '<span class="schedule-item__body">' +
       (item.showTime ? '<p class="schedule-item__time">' + item.time + '</p>' : '') +
       '<p class="schedule-item__text">' + item.text + '</p>' +
+      (item.rainAlt ? '<p class="schedule-item__rain-alt">☔ 雨なら → ' + item.rainAlt + '</p>' : '') +
       '</span>' +
       (isNow ? '<span class="schedule-item__now-badge">NOW</span>' : '') +
       '</button>'
@@ -239,6 +240,32 @@ function refreshSchedule() {
   renderScheduleStatus(document.getElementById('schedule-status-home'));
   renderScheduleStatus(document.getElementById('schedule-status-full'));
   renderScheduleList();
+}
+
+/* ---------------- ☔ 雨の日ヒント ---------------- */
+
+let rainTipIndex = Math.floor(Math.random() * RAIN_TIPS.length);
+
+function renderRainTip(el) {
+  if (!el) return;
+  const drops = Array.from({ length: 10 }).map((_, i) =>
+    '<span class="rain-tip-card__drop" style="left:' + (i * 10 + Math.random() * 6) + '%; animation-delay:' + (Math.random() * 1.4).toFixed(2) + 's;"></span>'
+  ).join('');
+
+  el.innerHTML =
+    '<div class="rain-tip-card__drops">' + drops + '</div>' +
+    '<div class="rain-tip-card__body">' +
+    '<p class="rain-tip-card__header">☔ 雨の日でも、めっちゃ楽しめる</p>' +
+    '<p class="rain-tip-card__sub">8/13・8/14は雨予報だけど、雨だからこその楽しみ方がたくさんあるよ。</p>' +
+    '<p class="rain-tip-card__tip">' + RAIN_TIPS[rainTipIndex] + '</p>' +
+    '<button class="rain-tip-card__next" data-next-rain-tip>次のヒント →</button>' +
+    '</div>';
+}
+
+function nextRainTip() {
+  rainTipIndex = (rainTipIndex + 1) % RAIN_TIPS.length;
+  renderRainTip(document.getElementById('rain-tip-home'));
+  renderRainTip(document.getElementById('rain-tip-schedule'));
 }
 
 /* ---------------- ルート表示 ---------------- */
@@ -272,6 +299,7 @@ function spotCardHTML(spot) {
     '<p class="spot-card__name">' + spot.name + '</p>' +
     '<p class="spot-card__desc">' + spot.desc + '</p>' +
     '</span>' +
+    (spot.rainFriendly ? '<span class="spot-card__rain-badge" title="雨の日でも◎">☔</span>' : '') +
     '<span class="spot-card__tag" style="background:' + tag.color + '">' + tag.label + '</span>' +
     '</button>'
   );
@@ -289,6 +317,7 @@ function openSpotModal(id) {
     '<p class="modal__area">' + spot.area + ' ・ <span style="color:' + tag.color + '">' + tag.label + '</span></p>' +
     '<p class="modal__desc">' + spot.desc + '</p>' +
     '<div class="modal__tip">💡 ' + spot.tip + '</div>' +
+    (spot.rainFriendly ? '<div class="modal__rain-note">☔ ' + spot.rainNote + '</div>' : '') +
     '<a class="modal__map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' +
     encodeURIComponent(spot.mapQuery) + '">地図アプリで開く ↗</a>';
   document.getElementById('spot-modal').classList.add('is-open');
@@ -305,29 +334,62 @@ function todayKey() {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
+function isWithinTripDates(date) {
+  return TRIP_DATES.some(d =>
+    d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate()
+  );
+}
+
+let bingoMode = 'sunny';
+
+function getActiveMissions() {
+  return bingoMode === 'rain' ? MISSIONS_RAIN : MISSIONS;
+}
+
+function getBingoStorageKey() {
+  return 'ek_bingo_' + (bingoMode === 'rain' ? 'rain_' : '') + todayKey();
+}
+
 function getBingoState() {
   try {
-    return JSON.parse(localStorage.getItem('ek_bingo_' + todayKey())) || [];
+    return JSON.parse(localStorage.getItem(getBingoStorageKey())) || [];
   } catch (e) {
     return [];
   }
 }
 
 function setBingoState(arr) {
-  localStorage.setItem('ek_bingo_' + todayKey(), JSON.stringify(arr));
+  localStorage.setItem(getBingoStorageKey(), JSON.stringify(arr));
 }
 
 function hasBingoLine(checkedIds) {
-  const idxSet = new Set(checkedIds.map(cid => MISSIONS.findIndex(m => m.id === cid)));
+  const missions = getActiveMissions();
+  const idxSet = new Set(checkedIds.map(cid => missions.findIndex(m => m.id === cid)));
   return WIN_LINES.some(line => line.every(i => idxSet.has(i)));
+}
+
+function renderBingoModeToggle() {
+  const toggleEl = document.getElementById('bingo-mode-toggle');
+  if (!toggleEl) return;
+  toggleEl.querySelectorAll('.bingo-mode-toggle__btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === bingoMode);
+  });
+}
+
+function setBingoMode(mode) {
+  bingoMode = mode;
+  localStorage.setItem('ek_bingo_mode_' + todayKey(), mode);
+  renderBingoModeToggle();
+  renderBingo();
 }
 
 function renderBingo() {
   const grid = document.getElementById('bingo-grid');
   if (!grid) return;
+  const missions = getActiveMissions();
   const checked = getBingoState();
 
-  grid.innerHTML = MISSIONS.map(m =>
+  grid.innerHTML = missions.map(m =>
     '<button class="bingo-cell ' + (checked.includes(m.id) ? 'is-checked' : '') + '" data-id="' + m.id + '">' +
     '<span class="bingo-cell__emoji">' + m.emoji + '</span>' +
     '<span class="bingo-cell__text">' + m.text + '</span>' +
@@ -344,12 +406,13 @@ function renderBingo() {
 function updateBingoStatus(checked) {
   const statusEl = document.getElementById('bingo-status');
   if (!statusEl) return;
-  if (checked.length === MISSIONS.length) {
+  const total = getActiveMissions().length;
+  if (checked.length === total) {
     statusEl.textContent = '🎉 コンプリート！最高のデートでした！';
   } else if (hasBingoLine(checked)) {
     statusEl.textContent = '🎉 ビンゴ達成中！';
   } else {
-    statusEl.textContent = checked.length + ' / ' + MISSIONS.length + ' 達成';
+    statusEl.textContent = checked.length + ' / ' + total + ' 達成';
   }
 }
 
@@ -363,7 +426,7 @@ function toggleBingo(id) {
   renderBingo();
 
   const hasLineAfter = hasBingoLine(checked);
-  if (isChecking && checked.length === MISSIONS.length) {
+  if (isChecking && checked.length === getActiveMissions().length) {
     launchConfetti({ count: 220 });
   } else if (isChecking && hasLineAfter && !hadLineBefore) {
     launchConfetti({ count: 150 });
@@ -532,19 +595,31 @@ function initPhotoTools() {
 
 function handlePhotoUpload(e) {
   const file = e.target.files[0];
+  e.target.value = '';
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const img = new Image();
-    img.onload = () => {
-      photoState.img = img;
-      photoState.stickers = [];
-      document.getElementById('photo-hint').style.display = 'none';
-      drawPhotoCanvas();
-    };
-    img.src = ev.target.result;
+
+  const hintEl = document.getElementById('photo-hint');
+  hintEl.textContent = '読み込み中…';
+  hintEl.style.display = 'block';
+
+  const objectUrl = URL.createObjectURL(file);
+  const img = new Image();
+
+  img.onload = () => {
+    photoState.img = img;
+    photoState.stickers = [];
+    hintEl.style.display = 'none';
+    drawPhotoCanvas();
+    URL.revokeObjectURL(objectUrl);
   };
-  reader.readAsDataURL(file);
+
+  img.onerror = () => {
+    hintEl.textContent = 'この写真は読み込めませんでした。別の写真かスクリーンショットでお試しください。';
+    hintEl.style.display = 'block';
+    URL.revokeObjectURL(objectUrl);
+  };
+
+  img.src = objectUrl;
 }
 
 function drawPhotoCanvas() {
@@ -646,10 +721,21 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshSchedule();
   setInterval(refreshSchedule, 30000);
 
+  renderRainTip(document.getElementById('rain-tip-home'));
+  renderRainTip(document.getElementById('rain-tip-schedule'));
+
   renderRoute();
+
+  const savedBingoMode = localStorage.getItem('ek_bingo_mode_' + todayKey());
+  bingoMode = savedBingoMode || (isWithinTripDates(new Date()) ? 'rain' : 'sunny');
+  renderBingoModeToggle();
   renderBingo();
   resetQuiz();
   initPhotoTools();
+
+  document.getElementById('bingo-mode-toggle').querySelectorAll('.bingo-mode-toggle__btn').forEach(btn => {
+    btn.addEventListener('click', () => setBingoMode(btn.dataset.mode));
+  });
 
   document.getElementById('bingo-reset').addEventListener('click', () => {
     if (confirm('今日のビンゴ記録をリセットしますか？')) {
@@ -677,6 +763,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = e.target.closest('[data-close-modal]');
     if (closeBtn) {
       closeSpotModal();
+      return;
+    }
+    const nextTipBtn = e.target.closest('[data-next-rain-tip]');
+    if (nextTipBtn) {
+      nextRainTip();
     }
   });
 });

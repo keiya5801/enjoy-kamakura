@@ -43,6 +43,8 @@
 
     <div class="card schedule-status" id="schedule-status-home"></div>
 
+    <div class="card rain-tip-card" id="rain-tip-home"></div>
+
     <div class="card sunset-widget" id="sunset-widget-home"></div>
 
     <div class="home-grid">
@@ -74,6 +76,7 @@
     <h2 class="section-title">📅 二人の記念日プラン</h2>
     <p class="section-lead">1周年記念日 &amp; Birthdayを祝う、特別な2日間。終わった予定もこれからの予定も、いつでも確認できます。</p>
     <div class="card schedule-status" id="schedule-status-full"></div>
+    <div class="card rain-tip-card" id="rain-tip-schedule"></div>
     <div class="schedule-day-tabs" id="schedule-day-tabs"></div>
     <div id="schedule-list" class="schedule-list"></div>
   </section>
@@ -90,6 +93,10 @@
   <section id="section-bingo" class="app-section">
     <h2 class="section-title">🎯 デートビンゴ</h2>
     <p class="section-lead">達成したらタップ！タテ・ヨコ・ナナメが揃うとビンゴ🎉</p>
+    <div class="bingo-mode-toggle" id="bingo-mode-toggle">
+      <button class="bingo-mode-toggle__btn" data-mode="sunny">☀️ 通常ミッション</button>
+      <button class="bingo-mode-toggle__btn" data-mode="rain">☔ 雨の日ミッション</button>
+    </div>
     <div id="bingo-grid" class="bingo-grid"></div>
     <div class="bingo-footer">
       <p id="bingo-status" class="bingo-status"></p>
