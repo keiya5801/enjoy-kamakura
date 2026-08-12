@@ -37,9 +37,11 @@
         <p class="hero__greeting" id="hero-greeting">こんにちは</p>
         <h1 class="hero__title">鎌倉 × 七里ヶ浜 × 江の島<br>デートナビ</h1>
         <p class="hero__subtitle">歩いて、食べて、遊んで。二人だけの一日を、もっと楽しく。</p>
-        <button class="btn btn--primary hero__cta" data-goto="route">ルートを見る 🚋</button>
+        <button class="btn btn--primary hero__cta" data-goto="schedule">予定を見る 📅</button>
       </div>
     </div>
+
+    <div class="card schedule-status" id="schedule-status-home"></div>
 
     <div class="card sunset-widget" id="sunset-widget-home"></div>
 
@@ -65,6 +67,15 @@
         <span class="tile-btn__desc">思い出を可愛くデコる</span>
       </button>
     </div>
+  </section>
+
+  <!-- ============ SCHEDULE ============ -->
+  <section id="section-schedule" class="app-section">
+    <h2 class="section-title">📅 二人の記念日プラン</h2>
+    <p class="section-lead">1周年記念日 &amp; Birthdayを祝う、特別な2日間。終わった予定もこれからの予定も、いつでも確認できます。</p>
+    <div class="card schedule-status" id="schedule-status-full"></div>
+    <div class="schedule-day-tabs" id="schedule-day-tabs"></div>
+    <div id="schedule-list" class="schedule-list"></div>
   </section>
 
   <!-- ============ ROUTE ============ -->
@@ -136,6 +147,7 @@
 
 <nav class="bottom-nav">
   <button class="bottom-nav__item active" data-goto="home"><span>🏠</span><small>ホーム</small></button>
+  <button class="bottom-nav__item" data-goto="schedule"><span>📅</span><small>予定</small></button>
   <button class="bottom-nav__item" data-goto="route"><span>🗺️</span><small>ルート</small></button>
   <button class="bottom-nav__item" data-goto="bingo"><span>🎯</span><small>ビンゴ</small></button>
   <button class="bottom-nav__item" data-goto="omikuji"><span>🔮</span><small>おみくじ</small></button>
@@ -144,6 +156,7 @@
 </nav>
 
 <script src="js/spots-data.js"></script>
+<script src="js/schedule-data.js"></script>
 <script src="js/sunset.js"></script>
 <script src="js/confetti.js"></script>
 <script src="js/audio.js"></script>

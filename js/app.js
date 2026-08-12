@@ -89,6 +89,158 @@ function updateSunsetWidget(containerId) {
   }
 }
 
+/* ---------------- 記念日スケジュール ---------------- */
+
+function formatDuration(ms) {
+  const mins = Math.max(0, Math.round(ms / 60000));
+  const d = Math.floor(mins / 1440);
+  const h = Math.floor((mins % 1440) / 60);
+  const m = mins % 60;
+  let out = '';
+  if (d > 0) out += d + '日';
+  if (h > 0) out += h + '時間';
+  out += m + '分';
+  return out;
+}
+
+function computeScheduleStatus(now) {
+  const items = ALL_TRIP_ITEMS.map(it => ({ item: it, dt: itemDateTime(it) }));
+  const first = items[0], last = items[items.length - 1];
+
+  if (now < first.dt) return { phase: 'before', first };
+  if (now >= last.dt) return { phase: 'after', last };
+
+  let current = null, next = null;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].dt <= now) {
+      current = items[i];
+      next = items[i + 1] || null;
+    } else {
+      break;
+    }
+  }
+  return { phase: 'during', current, next };
+}
+
+function renderScheduleStatus(el) {
+  if (!el) return;
+  const now = new Date();
+  const status = computeScheduleStatus(now);
+  let html = '';
+
+  if (status.phase === 'before') {
+    const diff = status.first.dt - now;
+    html =
+      '<p class="schedule-status__phase">旅行まであと少し</p>' +
+      '<div class="schedule-status__main">' +
+      '<span class="schedule-status__emoji">🎉</span>' +
+      '<div class="schedule-status__body">' +
+      '<p class="schedule-status__text">最初の予定は「' + status.first.item.text + '」</p>' +
+      '<p class="schedule-status__sub">' + status.first.item.time + '〜</p>' +
+      '</div></div>' +
+      '<p class="schedule-status__countdown">⏳ あと ' + formatDuration(diff) + '</p>';
+  } else if (status.phase === 'during') {
+    html =
+      '<p class="schedule-status__phase">' + status.current.item.dayLabel + ' ・ 進行中</p>' +
+      '<div class="schedule-status__main">' +
+      '<span class="schedule-status__emoji">' + status.current.item.emoji + '</span>' +
+      '<div class="schedule-status__body">' +
+      '<p class="schedule-status__text">只今: ' + status.current.item.text + '</p>' +
+      (status.next ? '<p class="schedule-status__sub">次は ' + status.next.item.time + ' 「' + status.next.item.text + '」</p>' : '<p class="schedule-status__sub">これが最後の予定です</p>') +
+      '</div></div>' +
+      (status.next ? '<p class="schedule-status__countdown">⏳ 次まであと ' + formatDuration(status.next.dt - now) + '</p>' : '');
+  } else {
+    html =
+      '<p class="schedule-status__phase">旅行終了</p>' +
+      '<div class="schedule-status__main">' +
+      '<span class="schedule-status__emoji">💝</span>' +
+      '<div class="schedule-status__body">' +
+      '<p class="schedule-status__text">素敵な2日間になりました</p>' +
+      '<p class="schedule-status__sub">最後の予定は「' + status.last.item.text + '」でした</p>' +
+      '</div></div>';
+  }
+
+  if (el.id === 'schedule-status-home') {
+    html += '<button class="btn btn--ghost schedule-status__link" data-goto="schedule">予定をすべて見る</button>';
+  }
+
+  el.innerHTML = html;
+}
+
+function determineDefaultScheduleDayIndex() {
+  const status = computeScheduleStatus(new Date());
+  if (status.phase === 'before') return 0;
+  if (status.phase === 'after') return TRIP_DAYS.length - 1;
+  return TRIP_DAYS.findIndex(d => d.label === status.current.item.dayLabel);
+}
+
+let scheduleActiveDayIndex = 0;
+
+function renderScheduleDayTabs() {
+  const tabsEl = document.getElementById('schedule-day-tabs');
+  if (!tabsEl) return;
+
+  tabsEl.innerHTML = TRIP_DAYS.map((day, i) => {
+    const dateLabel = TRIP_DATES[day.dateIndex].toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' });
+    return (
+      '<button class="schedule-day-tab ' + (i === scheduleActiveDayIndex ? 'active' : '') + '" data-day-index="' + i + '">' +
+      day.label + '<small>' + dateLabel + '</small>' +
+      '</button>'
+    );
+  }).join('');
+
+  tabsEl.querySelectorAll('.schedule-day-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      scheduleActiveDayIndex = Number(btn.dataset.dayIndex);
+      renderScheduleDayTabs();
+      renderScheduleList();
+    });
+  });
+}
+
+function renderScheduleList() {
+  const listEl = document.getElementById('schedule-list');
+  if (!listEl) return;
+
+  const now = new Date();
+  const status = computeScheduleStatus(now);
+  const currentItemRef = status.phase === 'during' ? status.current.item : null;
+  const day = TRIP_DAYS[scheduleActiveDayIndex];
+
+  listEl.innerHTML = day.items.map(item => {
+    const dt = itemDateTime(item);
+    const isNow = item === currentItemRef;
+    const isPast = dt < now && !isNow;
+
+    let cls = 'schedule-item';
+    if (!item.showTime) cls += ' schedule-item--sub';
+    if (isPast) cls += ' is-past';
+    if (isNow) cls += ' is-now';
+    if (item.spotId) cls += ' is-linkable';
+
+    return (
+      '<button class="' + cls + '"' + (item.spotId ? ' data-spot-id="' + item.spotId + '"' : '') + '>' +
+      '<span class="schedule-item__marker">' + item.emoji + '</span>' +
+      '<span class="schedule-item__body">' +
+      (item.showTime ? '<p class="schedule-item__time">' + item.time + '</p>' : '') +
+      '<p class="schedule-item__text">' + item.text + '</p>' +
+      '</span>' +
+      (isNow ? '<span class="schedule-item__now-badge">NOW</span>' : '') +
+      '</button>'
+    );
+  }).join('');
+
+  listEl.querySelectorAll('.schedule-item[data-spot-id]').forEach(btn => {
+    btn.addEventListener('click', () => openSpotModal(btn.dataset.spotId));
+  });
+}
+
+function refreshSchedule() {
+  renderScheduleStatus(document.getElementById('schedule-status-home'));
+  renderScheduleStatus(document.getElementById('schedule-status-full'));
+  renderScheduleList();
+}
+
 /* ---------------- ルート表示 ---------------- */
 
 function renderRoute() {
@@ -488,6 +640,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSunsetWidget('sunset-widget-home');
     updateSunsetWidget('sunset-widget-route');
   }, 30000);
+
+  scheduleActiveDayIndex = determineDefaultScheduleDayIndex();
+  renderScheduleDayTabs();
+  refreshSchedule();
+  setInterval(refreshSchedule, 30000);
 
   renderRoute();
   renderBingo();

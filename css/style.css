@@ -268,6 +268,195 @@ button { font-family: inherit; }
   color: var(--ink-soft);
 }
 
+/* ---------- Schedule status ---------- */
+
+.schedule-status {
+  margin-top: 16px;
+}
+
+.schedule-status__phase {
+  margin: 0 0 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--sea-deep);
+  text-transform: uppercase;
+}
+
+.schedule-status__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.schedule-status__emoji { font-size: 2rem; flex-shrink: 0; }
+
+.schedule-status__body { min-width: 0; }
+
+.schedule-status__text {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.02rem;
+}
+
+.schedule-status__sub {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.schedule-status__countdown {
+  margin-top: 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--coral);
+}
+
+.schedule-status__link {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+/* ---------- Schedule list ---------- */
+
+.schedule-day-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 14px;
+}
+
+.schedule-day-tab {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 6px;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.schedule-day-tab small {
+  display: block;
+  font-weight: 600;
+  font-size: 0.66rem;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+.schedule-day-tab.active {
+  background: linear-gradient(135deg, var(--sunset-1), var(--sunset-2));
+  color: var(--white);
+}
+
+.schedule-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-list::before {
+  content: '';
+  position: absolute;
+  left: 21px; top: 6px; bottom: 6px;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, rgba(43,38,32,0.18) 0 6px, transparent 6px 12px);
+  z-index: 0;
+}
+
+.schedule-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 10px 14px;
+  border: 2px solid transparent;
+  width: 100%;
+  text-align: left;
+  cursor: default;
+  transition: transform 0.15s ease;
+}
+
+.schedule-item.is-linkable { cursor: pointer; }
+.schedule-item.is-linkable:active { transform: scale(0.98); }
+
+.schedule-item--sub {
+  padding: 6px 14px 6px 54px;
+  box-shadow: none;
+  background: transparent;
+}
+.schedule-item--sub .schedule-item__marker { display: none; }
+.schedule-item--sub .schedule-item__text { font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); }
+
+.schedule-item__marker {
+  width: 42px; height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  background: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.schedule-item__body { flex: 1 1 auto; min-width: 0; }
+
+.schedule-item__time {
+  margin: 0 0 2px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--sea-deep);
+}
+
+.schedule-item__text {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.schedule-item.is-past {
+  opacity: 0.5;
+}
+.schedule-item.is-past .schedule-item__marker {
+  background: var(--bamboo);
+  color: var(--white);
+}
+
+.schedule-item.is-now {
+  border-color: var(--sunset-1);
+  box-shadow: 0 0 0 4px rgba(255, 126, 95, 0.15), var(--shadow-sm);
+  animation: scheduleNowPulse 2.2s ease-in-out infinite;
+}
+.schedule-item.is-now .schedule-item__marker {
+  background: linear-gradient(135deg, var(--sunset-1), var(--sunset-2));
+  color: var(--white);
+}
+.schedule-item__now-badge {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--sunset-1), var(--sunset-2));
+  color: var(--white);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+
+@keyframes scheduleNowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 126, 95, 0.35), var(--shadow-sm); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 126, 95, 0), var(--shadow-sm); }
+}
+
 /* ---------- Home grid ---------- */
 
 .home-grid {
@@ -775,6 +964,10 @@ button { font-family: inherit; }
 @media (max-width: 380px) {
   .bottom-nav__item span { font-size: 1.05rem; }
   .bottom-nav__item { font-size: 0.55rem; padding: 6px 1px; }
+}
+
+@media (max-width: 340px) {
+  .bottom-nav__item small { display: none; }
 }
 
 /* ---------- Responsive ---------- */
