@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EnjoyKamakura | 鎌倉・七里ヶ浜・江の島デートナビ</title>
+<meta name="description" content="鎌倉・七里ヶ浜・江の島をめぐるデートを盛り上げる、超インタラクティブなガイドアプリ。">
+<meta name="theme-color" content="#2f7f9e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛩️</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="confetti-canvas-holder"></div>
+
+<header class="app-header">
+  <div class="app-header__title">
+    <span class="app-header__emoji">⛩️</span>
+    <span>EnjoyKamakura</span>
+  </div>
+  <button id="audio-toggle" class="icon-btn" title="波音BGM" aria-label="波音BGMの再生切り替え">🔇</button>
+</header>
+
+<main id="main">
+
+  <!-- ============ HOME ============ -->
+  <section id="section-home" class="app-section active">
+    <div class="hero" id="hero">
+      <div class="hero__deco" aria-hidden="true">
+        <div class="hero__sun-moon" id="hero-sun-moon"></div>
+        <svg class="hero__waves" viewBox="0 0 400 60" preserveAspectRatio="none">
+          <path class="wave wave--back" d="M0,30 Q50,10 100,30 T200,30 T300,30 T400,30 V60 H0 Z"></path>
+          <path class="wave wave--front" d="M0,35 Q50,55 100,35 T200,35 T300,35 T400,35 V60 H0 Z"></path>
+        </svg>
+      </div>
+      <div class="hero__content">
+        <p class="hero__greeting" id="hero-greeting">こんにちは</p>
+        <h1 class="hero__title">鎌倉 × 七里ヶ浜 × 江の島<br>デートナビ</h1>
+        <p class="hero__subtitle">歩いて、食べて、遊んで。二人だけの一日を、もっと楽しく。</p>
+        <button class="btn btn--primary hero__cta" data-goto="route">ルートを見る 🚋</button>
+      </div>
+    </div>
+
+    <div class="card sunset-widget" id="sunset-widget-home"></div>
+
+    <div class="home-grid">
+      <button class="tile-btn" data-goto="bingo">
+        <span class="tile-btn__emoji">🎯</span>
+        <span class="tile-btn__label">デートビンゴ</span>
+        <span class="tile-btn__desc">9つのミッションに挑戦</span>
+      </button>
+      <button class="tile-btn" data-goto="omikuji">
+        <span class="tile-btn__emoji">🔮</span>
+        <span class="tile-btn__label">今日のおみくじ</span>
+        <span class="tile-btn__desc">二人の運勢を占う</span>
+      </button>
+      <button class="tile-btn" data-goto="quiz">
+        <span class="tile-btn__emoji">💑</span>
+        <span class="tile-btn__label">相性診断</span>
+        <span class="tile-btn__desc">全8問でシンクロ度チェック</span>
+      </button>
+      <button class="tile-btn" data-goto="photo">
+        <span class="tile-btn__emoji">📸</span>
+        <span class="tile-btn__label">フォトフレーム</span>
+        <span class="tile-btn__desc">思い出を可愛くデコる</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ ROUTE ============ -->
+  <section id="section-route" class="app-section">
+    <h2 class="section-title">🗺️ おすすめルート</h2>
+    <p class="section-lead">鎌倉 → 七里ヶ浜 → 江の島。タップして詳細をチェック。</p>
+    <div class="sunset-widget card" id="sunset-widget-route"></div>
+    <div id="route-list" class="route-list"></div>
+  </section>
+
+  <!-- ============ BINGO ============ -->
+  <section id="section-bingo" class="app-section">
+    <h2 class="section-title">🎯 デートビンゴ</h2>
+    <p class="section-lead">達成したらタップ！タテ・ヨコ・ナナメが揃うとビンゴ🎉</p>
+    <div id="bingo-grid" class="bingo-grid"></div>
+    <div class="bingo-footer">
+      <p id="bingo-status" class="bingo-status"></p>
+      <button id="bingo-reset" class="btn btn--ghost">今日の記録をリセット</button>
+    </div>
+  </section>
+
+  <!-- ============ OMIKUJI ============ -->
+  <section id="section-omikuji" class="app-section">
+    <h2 class="section-title">🔮 今日のおみくじ</h2>
+    <p class="section-lead">二人の今日の運勢と、ラッキースポット・ラッキーフードを占います。</p>
+    <div class="omikuji-stage">
+      <div class="omikuji-box" id="omikuji-box">
+        <div class="omikuji-box__lid">🎋</div>
+        <p class="omikuji-box__hint">タップして引く</p>
+      </div>
+      <div id="omikuji-result" class="omikuji-result"></div>
+      <button id="omikuji-draw" class="btn btn--primary">おみくじを引く</button>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="section-quiz" class="app-section">
+    <h2 class="section-title">💑 相性診断ミニゲーム</h2>
+    <p id="quiz-intro" class="section-lead">全8問。まずは一人目が回答して、次に二人目にスマホを渡そう。</p>
+    <div id="quiz-stage" class="quiz-stage"></div>
+  </section>
+
+  <!-- ============ PHOTO ============ -->
+  <section id="section-photo" class="app-section">
+    <h2 class="section-title">📸 フォトフレームメーカー</h2>
+    <p class="section-lead">写真を読み込んで、スタンプを押して、思い出をデコろう。</p>
+    <div class="photo-tools">
+      <label class="btn btn--primary photo-upload-btn">
+        写真を選ぶ
+        <input type="file" id="photo-input" accept="image/*" hidden>
+      </label>
+      <div id="sticker-bar" class="sticker-bar"></div>
+      <button id="photo-undo" class="btn btn--ghost">元に戻す</button>
+      <button id="photo-download" class="btn btn--ghost">保存する</button>
+    </div>
+    <div class="photo-canvas-wrap">
+      <canvas id="photo-canvas" width="800" height="1000"></canvas>
+      <p id="photo-hint" class="photo-hint">まずは写真を選んでね</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ SPOT MODAL ============ -->
+<div id="spot-modal" class="modal" aria-hidden="true">
+  <div class="modal__backdrop" data-close-modal></div>
+  <div class="modal__card" id="spot-modal-card"></div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bottom-nav__item active" data-goto="home"><span>🏠</span><small>ホーム</small></button>
+  <button class="bottom-nav__item" data-goto="route"><span>🗺️</span><small>ルート</small></button>
+  <button class="bottom-nav__item" data-goto="bingo"><span>🎯</span><small>ビンゴ</small></button>
+  <button class="bottom-nav__item" data-goto="omikuji"><span>🔮</span><small>おみくじ</small></button>
+  <button class="bottom-nav__item" data-goto="quiz"><span>💑</span><small>相性</small></button>
+  <button class="bottom-nav__item" data-goto="photo"><span>📸</span><small>フォト</small></button>
+</nav>
+
+<script src="js/spots-data.js"></script>
+<script src="js/sunset.js"></script>
+<script src="js/confetti.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
