@@ -609,6 +609,7 @@ function handlePhotoUpload(e) {
     photoState.img = img;
     photoState.stickers = [];
     hintEl.style.display = 'none';
+    resizeCanvasToImage(img);
     drawPhotoCanvas();
     URL.revokeObjectURL(objectUrl);
   };
@@ -620,6 +621,23 @@ function handlePhotoUpload(e) {
   };
 
   img.src = objectUrl;
+}
+
+function resizeCanvasToImage(img) {
+  const canvas = document.getElementById('photo-canvas');
+  const LONG_EDGE = 1000;
+  const MIN_RATIO = 0.55; // 縦長すぎる/横長すぎる写真は極端にならないようクランプ
+  const MAX_RATIO = 1.8;
+
+  const ratio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, img.width / img.height));
+
+  if (ratio >= 1) {
+    canvas.width = LONG_EDGE;
+    canvas.height = Math.round(LONG_EDGE / ratio);
+  } else {
+    canvas.height = LONG_EDGE;
+    canvas.width = Math.round(LONG_EDGE * ratio);
+  }
 }
 
 function drawPhotoCanvas() {
