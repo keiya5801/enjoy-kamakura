@@ -21,7 +21,7 @@ const TRIP_DAYS = [
       { time: '12:30', dateIndex: 0, emoji: '🕊', text: '鶴岡八幡宮お参り', showTime: false, spotId: 'tsurugaoka' },
       { time: '13:30', dateIndex: 0, emoji: '👣', text: 'ぷらぷら散策', showTime: false },
       { time: '15:00', dateIndex: 0, emoji: '✅', text: 'ホテルチェックイン', showTime: true },
-      { time: '15:30', dateIndex: 0, emoji: '🏊', text: 'プール', showTime: true, rainAlt: 'ホテルの大浴場・温泉でぽかぽかタイム ♨️ プールの代わりにゆったり二人でリラックス。' },
+      { time: '15:30', dateIndex: 0, emoji: '🏊', text: 'プール', showTime: true, rainAlt: 'お部屋でまったり映画タイム 🎬 プールの代わりに、二人でゆっくり過ごす贅沢な時間を。' },
       { time: '17:00', dateIndex: 0, emoji: '🚿', text: '部屋でシャワー', showTime: true },
       { time: '18:00', dateIndex: 0, emoji: '🌉', text: 'ホテルのレストランでディナー', showTime: true },
       { time: '20:00', dateIndex: 0, emoji: '🚶', text: 'お散歩', showTime: true },
