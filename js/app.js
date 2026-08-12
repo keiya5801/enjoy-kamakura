@@ -593,6 +593,62 @@ function initPhotoTools() {
   document.getElementById('photo-download').addEventListener('click', downloadPhoto);
 }
 
+const PHOTO_MAX_EDGE = 2000; // 巨大な元画像はここまで縮小してから扱う（メモリ/デコード対策）
+const PHOTO_LOAD_TIMEOUT = 15000;
+
+function isLikelyHeic(file) {
+  return /hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name);
+}
+
+// createImageBitmapは<img>より対応フォーマット・大きな画像の扱いが堅牢なため優先し、
+// 失敗した場合のみ従来のImage要素方式にフォールバックする
+function loadImageViaBitmap(file) {
+  return createImageBitmap(file).then(bitmap => {
+    if (!bitmap.width || !bitmap.height) throw new Error('empty bitmap');
+    if (bitmap.width <= PHOTO_MAX_EDGE && bitmap.height <= PHOTO_MAX_EDGE) return bitmap;
+    const scale = PHOTO_MAX_EDGE / Math.max(bitmap.width, bitmap.height);
+    return createImageBitmap(bitmap, {
+      resizeWidth: Math.round(bitmap.width * scale),
+      resizeHeight: Math.round(bitmap.height * scale),
+      resizeQuality: 'high'
+    });
+  });
+}
+
+function loadImageViaElement(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    const timeoutId = setTimeout(() => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('timeout'));
+    }, PHOTO_LOAD_TIMEOUT);
+
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      URL.revokeObjectURL(objectUrl);
+      if (!img.naturalWidth || !img.naturalHeight) {
+        reject(new Error('empty image'));
+        return;
+      }
+      resolve(img);
+    };
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('decode error'));
+    };
+    img.src = objectUrl;
+  });
+}
+
+function loadImageFromFile(file) {
+  if (window.createImageBitmap) {
+    return loadImageViaBitmap(file).catch(() => loadImageViaElement(file));
+  }
+  return loadImageViaElement(file);
+}
+
 function handlePhotoUpload(e) {
   const file = e.target.files[0];
   e.target.value = '';
@@ -602,25 +658,22 @@ function handlePhotoUpload(e) {
   hintEl.textContent = '読み込み中…';
   hintEl.style.display = 'block';
 
-  const objectUrl = URL.createObjectURL(file);
-  const img = new Image();
-
-  img.onload = () => {
-    photoState.img = img;
+  loadImageFromFile(file).then(image => {
+    if (photoState.img && typeof photoState.img.close === 'function') {
+      photoState.img.close();
+    }
+    photoState.img = image;
     photoState.stickers = [];
     hintEl.style.display = 'none';
-    resizeCanvasToImage(img);
+    resizeCanvasToImage(image);
     drawPhotoCanvas();
-    URL.revokeObjectURL(objectUrl);
-  };
-
-  img.onerror = () => {
-    hintEl.textContent = 'この写真は読み込めませんでした。別の写真かスクリーンショットでお試しください。';
+  }).catch(() => {
+    const heicHint = isLikelyHeic(file)
+      ? 'HEIC形式の写真は一部のブラウザで読み込めないことがあります。一度スクリーンショットを撮ってから読み込むと確実です。'
+      : '別の写真かスクリーンショットでお試しください。';
+    hintEl.textContent = 'この写真は読み込めませんでした。' + heicHint;
     hintEl.style.display = 'block';
-    URL.revokeObjectURL(objectUrl);
-  };
-
-  img.src = objectUrl;
+  });
 }
 
 function resizeCanvasToImage(img) {
